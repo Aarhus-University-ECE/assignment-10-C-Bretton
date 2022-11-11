@@ -9,25 +9,20 @@ struct tree_node *Insert(int x, struct tree_node *t) {
   // Insert item x into the tree t
 
   
-  //If an Empty Node is found input item x and initialize a left and right for it
+  //If an Empty Node is found create a new node with item x and set t as the created node
   if (Empty(t))
   {
-    t->item = x;
-
-    struct tree_node *left = Initialize(left);
-    t->left = left;
     
-    struct tree_node *right = Initialize(right);
-    t->right = right;
-
+    //Create new node t, with the item set as x
+    t = CreateNode(x);
   }
   //else if x is less or equal to current node item go to the left child
   else if(x <= t->item){
-    Insert(x, t->left);
+    t->left = Insert(x, t->left);
   }
   //else if x is larger than current node item go to the right child
   else if(x > t->item){
-    Insert(x, t->right);
+    t->right = Insert(x, t->right);
   }
 
   return t; //return the node
@@ -40,7 +35,7 @@ struct tree_node *Remove(int x, struct tree_node *t) {
   if(!Contains(x, t)){
      return t;
   }
-  //if x is equal to the current node
+  //if x is equal to the current node item
   if (x == t->item)
   {
     
@@ -48,9 +43,10 @@ struct tree_node *Remove(int x, struct tree_node *t) {
     //if there is no children
     if(Empty(t->left) && Empty(t->right)){
       
-      //the item is NULL'ed, to remove the item from the tree
-      t->item = NULL;
-      
+      //make a temp as the either t left or right which is NULL, free t, and then return t as NULL with return temp
+      struct tree_node *temp = t->right;
+      free(t);
+      return temp;
     }
     //if there is only one child
     else if(Empty(t->left) != Empty(t->right)){
@@ -58,20 +54,18 @@ struct tree_node *Remove(int x, struct tree_node *t) {
       //if the right child is not empty
       if (!Empty(t->right))
       {
-
-        //set the item as the right childs item, to remove the current item
-        t->item = t->right->item;
-        Remove(t->item, t->right); //then removes the right child item, from the right child tree, recursive
-
+        //set temp as t's right child, then free t and return temp (right child)
+        struct tree_node *temp = t->right;
+        free(t);
+        return temp;
         
       }
       //else the left child is not empty
       else{
-        
-        //set the item as the left childs item, to remove current item
-        t->item = t->left->item;
-        Remove(t->item, t->left); //then remove the left item, from the left child tree, recursive 
-        
+        //set temp as t's left child, then free t and return temp (left child)
+        struct tree_node *temp = t->left;
+        free(t);
+        return temp;
 
       }
 
@@ -80,31 +74,30 @@ struct tree_node *Remove(int x, struct tree_node *t) {
     else{
       
       //if there are 2 children, the item removed should be replaces with either
-      //the smallest in the right tree or the largest in the left tree. This will go for the smallest in the left
+      //the smallest in the right tree or the largest in the left tree. This will go for the smallest in the right child
 
-      //Creating a temporary clone of the right child, to find the value to swap.
-      struct tree_node *temp = Initialize(temp);
-      temp = t->right;
+      //Creating a temp of the right child, to find the value to swap.
+      struct tree_node *temp = t->right;
       
-      //search for the left most item in the right child, to replace the item to be removed
+      //search for the left most item in the right child, to find the replacement
       while(!Empty(temp->left)){
         temp = temp->left;
       }
-
-      //replace the nodes item with the found replacement
+      //replace the t's item with the found replacement temp item
       t->item = temp->item;
-      Remove(t->item, t->right); //then remove the replacement which was found in the right child tree
-
-
+      Remove(t->item, t->right); //then remove the replacement from right child
+      return t;
     }
   }
   //else if item is not found, and x is less than current node item, remove item from the left child
   else if(x < t->item){
-    Remove(x, t->left);
+    t->left = Remove(x, t->left);
+    return t;
   }
   //else if x is larger than current node item, remove it from the right child
   else if(x > t->item){
-    Remove(x, t->right); 
+    t->right = Remove(x, t->right); 
+    return t;
   }
 
   //return node t
@@ -141,18 +134,27 @@ int Contains(int x, struct tree_node *t) {
 
 struct tree_node *Initialize(struct tree_node *t) {
   // Create an empty tree node
-  t = (struct tree_node*)malloc(sizeof(struct tree_node));
-  //set item, left child and right child to NULL
-  t->item = NULL; 
-  t->left = NULL;
-  t->right = NULL;
-
+  //set t as NULL
+  t = NULL;
+  
   return t; //return the initialized node
 }
 
+struct tree_node *CreateNode(int x) {
+  // Create a new tree node with item x
+  struct tree_node *newnode = malloc(sizeof(struct tree_node));
+  //set item to value x and left child and right child to NULL
+  newnode->item = x; 
+  newnode->left = NULL;
+  newnode->right = NULL;
+
+  return newnode; //return the  created note
+}
+
+
 int Empty(struct tree_node *t) {
   // Test if empty
-  if(t->item == NULL){
+  if(t == NULL){
     return 1; //if the first item in the tree t is NULL, tree is empty, return true
   }
   else{
