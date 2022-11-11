@@ -26,20 +26,48 @@ void free_list(node *p) {
 void print_list(node *p) {
   // Add your code for exercise 1
   // There is NO testcode for this
+  printf("%d ", p->value); // print current value
+
+  if(p->next != NULL) //if next element is not empty
+  {
+    print_list(p->next); //call print_list on next element
+  }
+  else{
+    return; //else return
+  }
+
 }
 
 int sum_squares(node *p) {
   // Add your code for excercise 2
   // You can find the tests in tests.cpp
-  return -1;
+
+  //if node is not NULL
+  if(p != NULL)
+  {
+    return p->value*p->value + sum_squares(p->next); //return current node value sqaured + call sum_squares to the next node
+  }
+  else if(p == NULL)
+  {
+    return 0; //if current node is NULL, return 0;
+  }
+
 }
 
 typedef int (*fn_int_to_int)(int);
 
 node *map(node *p, fn_int_to_int f) { 
   // Add your code for excercise 3
-  
-  return NULL; 
+
+  if (p == NULL) //if current node is NULL
+  {
+    return NULL; //return NULL
+  }
+  else
+  {
+    return make_node(f(p->value), map(p->next, f)); //return the current node value squared by function f, and the map of next node
+  }
+
 }
 
 int square(int x) { return x * x; }
